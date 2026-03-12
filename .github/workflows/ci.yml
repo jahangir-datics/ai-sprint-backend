@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: sprint
+          POSTGRES_PASSWORD: sprint123
+          POSTGRES_DB: ai_sprint_db
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://sprint:sprint123@localhost:5433/ai_sprint_db?schema=public
+      JWT_SECRET: test-secret-key-for-ci
+      JWT_EXPIRY: 15m
+      JWT_REFRESH_EXPIRY: 7d
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Run migrations
+        run: npx prisma migrate deploy
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Unit Tests
+        run: npm test -- --coverage --passWithNoTests
+
+      - name: E2E Tests
+        run: npm run test:e2e -- --passWithNoTests
