@@ -125,15 +125,9 @@ export class AuthService {
   }
 
   async logout(refreshToken: string) {
-    const storedToken = await this.prisma.refreshToken.findUnique({
+    await this.prisma.refreshToken.deleteMany({
       where: { token: refreshToken },
     });
-
-    if (storedToken) {
-      await this.prisma.refreshToken.delete({
-        where: { id: storedToken.id },
-      });
-    }
   }
 
   async getProfile(userId: string) {

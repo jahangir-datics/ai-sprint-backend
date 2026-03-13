@@ -8,7 +8,7 @@ import { AuthController } from './auth.controller.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 import { LocalStrategy } from './strategies/local.strategy.js';
 import { ApiKeyStrategy } from './strategies/api-key.strategy.js';
-import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
+import { CombinedAuthGuard } from './guards/combined-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { ApiKeysModule } from '../api-keys/api-keys.module.js';
 
@@ -41,7 +41,7 @@ import { ApiKeysModule } from '../api-keys/api-keys.module.js';
     ApiKeyStrategy,
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard,
+      useClass: CombinedAuthGuard,
     },
     {
       provide: APP_GUARD,

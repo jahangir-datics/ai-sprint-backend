@@ -22,6 +22,7 @@ describe('AuthService', () => {
       findUnique: jest.Mock;
       create: jest.Mock;
       delete: jest.Mock;
+      deleteMany: jest.Mock;
     };
   };
   let jwtService: { sign: jest.Mock };
@@ -37,6 +38,7 @@ describe('AuthService', () => {
         findUnique: jest.fn(),
         create: jest.fn(),
         delete: jest.fn(),
+        deleteMany: jest.fn(),
       },
     };
 
@@ -249,20 +251,17 @@ describe('AuthService', () => {
 
   describe('logout', () => {
     it('should delete the refresh token', async () => {
-      prisma.refreshToken.findUnique.mockResolvedValue({
-        id: 'rt-1',
-        token: 'valid-refresh',
-      });
+      prisma.refreshToken.deleteMany.mockResolvedValue({ count: 1 });
 
       await service.logout('valid-refresh');
 
-      expect(prisma.refreshToken.delete).toHaveBeenCalledWith({
-        where: { id: 'rt-1' },
+      expect(prisma.refreshToken.deleteMany).toHaveBeenCalledWith({
+        where: { token: 'valid-refresh' },
       });
     });
 
     it('should not throw if refresh token does not exist', async () => {
-      prisma.refreshToken.findUnique.mockResolvedValue(null);
+      prisma.refreshToken.deleteMany.mockResolvedValue({ count: 0 });
 
       await expect(service.logout('nonexistent')).resolves.not.toThrow();
     });
