@@ -14,7 +14,7 @@ describe('API Keys (e2e)', () => {
 
   const testUser = {
     email: `e2e-keys-${Date.now()}@test.com`,
-    password: 'TestPass123!',
+    password: 'TestPass123!', // NOSONAR — test fixture
     name: 'E2E Keys User',
   };
 

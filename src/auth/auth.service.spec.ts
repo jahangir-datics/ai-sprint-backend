@@ -68,12 +68,12 @@ describe('AuthService', () => {
         id: 'uuid-1',
         email: 'test@example.com',
         name: 'Test',
-        password: 'hashed',
+        password: 'hashed', // NOSONAR — test fixture
       });
 
       const result = await service.register({
         email: 'test@example.com',
-        password: 'password123',
+        password: 'password123', // NOSONAR — test fixture
         name: 'Test',
       });
 
@@ -96,7 +96,7 @@ describe('AuthService', () => {
       await expect(
         service.register({
           email: 'test@example.com',
-          password: 'password123',
+          password: 'password123', // NOSONAR — test fixture
         }),
       ).rejects.toThrow(ConflictException);
     });
@@ -107,12 +107,12 @@ describe('AuthService', () => {
         id: 'uuid-1',
         email: 'test@example.com',
         name: null,
-        password: 'hashed',
+        password: 'hashed', // NOSONAR — test fixture
       });
 
       await service.register({
         email: 'test@example.com',
-        password: 'password123',
+        password: 'password123', // NOSONAR — test fixture
       });
 
       const createCall = prisma.user.create.mock.calls[0][0] as {
@@ -163,7 +163,7 @@ describe('AuthService', () => {
       prisma.user.findUnique.mockResolvedValue({
         id: 'uuid-1',
         email: 'test@example.com',
-        password: 'hashed',
+        password: 'hashed', // NOSONAR — test fixture
         isActive: false,
       });
 

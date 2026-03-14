@@ -37,7 +37,7 @@ describe('Auth (e2e)', () => {
 
   const testUser = {
     email: `e2e-auth-${Date.now()}@test.com`,
-    password: 'TestPass123!',
+    password: 'TestPass123!', // NOSONAR — test fixture
     name: 'E2E Auth User',
   };
 
@@ -69,14 +69,14 @@ describe('Auth (e2e)', () => {
     it('should reject invalid email', () => {
       return request(app.getHttpServer())
         .post('/auth/register')
-        .send({ email: 'not-an-email', password: 'TestPass123!' })
+        .send({ email: 'not-an-email', password: 'TestPass123!' }) // NOSONAR
         .expect(400);
     });
 
     it('should reject short password', () => {
       return request(app.getHttpServer())
         .post('/auth/register')
-        .send({ email: 'short@test.com', password: '123' })
+        .send({ email: 'short@test.com', password: '123' }) // NOSONAR
         .expect(400);
     });
   });
@@ -100,14 +100,14 @@ describe('Auth (e2e)', () => {
     it('should reject invalid credentials', () => {
       return request(app.getHttpServer())
         .post('/auth/login')
-        .send({ email: testUser.email, password: 'wrongpassword' })
+        .send({ email: testUser.email, password: 'wrongpassword' }) // NOSONAR
         .expect(401);
     });
 
     it('should reject non-existent user', () => {
       return request(app.getHttpServer())
         .post('/auth/login')
-        .send({ email: 'nobody@test.com', password: 'TestPass123!' })
+        .send({ email: 'nobody@test.com', password: 'TestPass123!' }) // NOSONAR
         .expect(401);
     });
   });
