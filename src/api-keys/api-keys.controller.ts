@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,15 +16,17 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 import { ApiKeysService } from './api-keys.service.js';
 import { CreateApiKeyDto } from './dto/create-api-key.dto.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
 
 @ApiTags('API Keys')
 @ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
 @Controller('api-keys')
 export class ApiKeysController {
-  constructor(private apiKeysService: ApiKeysService) {}
+  constructor(private readonly apiKeysService: ApiKeysService) {}
 
   @Get()
   @ApiOperation({ summary: 'List all API keys for the current user' })

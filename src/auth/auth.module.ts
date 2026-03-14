@@ -26,7 +26,8 @@ import { ApiKeysModule } from '../api-keys/api-keys.module.js';
         return {
           secret,
           signOptions: {
-            expiresIn: (configService.get<string>('JWT_EXPIRY') || '15m') as `${number}${'s' | 'm' | 'h' | 'd'}`,
+            expiresIn: (configService.get<string>('JWT_EXPIRY') ||
+              '15m') as `${number}${'s' | 'm' | 'h' | 'd'}`,
           },
         };
       },

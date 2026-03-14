@@ -6,7 +6,7 @@ import { ApiKeysService } from '../../api-keys/api-keys.service.js';
 
 @Injectable()
 export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') {
-  constructor(private apiKeysService: ApiKeysService) {
+  constructor(private readonly apiKeysService: ApiKeysService) {
     super();
   }
 
@@ -16,11 +16,6 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') {
       throw new UnauthorizedException('API key is required');
     }
 
-    const user = await this.apiKeysService.validateApiKey(apiKey);
-    if (!user) {
-      throw new UnauthorizedException('Invalid API key');
-    }
-
-    return user;
+    return this.apiKeysService.validateApiKey(apiKey);
   }
 }

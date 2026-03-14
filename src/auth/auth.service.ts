@@ -7,16 +7,16 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RegisterDto } from './dto/register.dto.js';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
-    private jwtService: JwtService,
-    private configService: ConfigService,
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -70,14 +70,32 @@ export class AuthService {
     };
   }
 
+  async validateUserById(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('User not found or disabled');
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+  }
+
   async login(user: { id: string; email: string; role: string }) {
     const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload);
 
     const refreshToken = randomUUID();
-    const refreshExpiry = this.configService.get<string>('JWT_REFRESH_EXPIRY') || '7d';
+    const refreshExpiry =
+      this.configService.get<string>('JWT_REFRESH_EXPIRY') || '7d';
+    const days = Number.parseInt(refreshExpiry, 10);
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + parseInt(refreshExpiry) || 7);
+    expiresAt.setDate(expiresAt.getDate() + (Number.isNaN(days) ? 7 : days));
 
     await this.prisma.refreshToken.create({
       data: {
@@ -105,7 +123,7 @@ export class AuthService {
     }
 
     if (storedToken.expiresAt < new Date()) {
-      await this.prisma.refreshToken.delete({
+      await this.prisma.refreshToken.deleteMany({
         where: { id: storedToken.id },
       });
       throw new ForbiddenException('Refresh token has expired');
@@ -124,9 +142,9 @@ export class AuthService {
     };
   }
 
-  async logout(refreshToken: string) {
+  async logout(userId: string, refreshToken: string) {
     await this.prisma.refreshToken.deleteMany({
-      where: { token: refreshToken },
+      where: { token: refreshToken, userId },
     });
   }
 

@@ -115,7 +115,9 @@ describe('AuthService', () => {
         password: 'password123',
       });
 
-      const createCall = prisma.user.create.mock.calls[0][0];
+      const createCall = prisma.user.create.mock.calls[0][0] as {
+        data: { password: string };
+      };
       const isHashed = await bcrypt.compare(
         'password123',
         createCall.data.password,
@@ -250,20 +252,22 @@ describe('AuthService', () => {
   });
 
   describe('logout', () => {
-    it('should delete the refresh token', async () => {
+    it('should delete the refresh token scoped by userId', async () => {
       prisma.refreshToken.deleteMany.mockResolvedValue({ count: 1 });
 
-      await service.logout('valid-refresh');
+      await service.logout('uuid-1', 'valid-refresh');
 
       expect(prisma.refreshToken.deleteMany).toHaveBeenCalledWith({
-        where: { token: 'valid-refresh' },
+        where: { token: 'valid-refresh', userId: 'uuid-1' },
       });
     });
 
     it('should not throw if refresh token does not exist', async () => {
       prisma.refreshToken.deleteMany.mockResolvedValue({ count: 0 });
 
-      await expect(service.logout('nonexistent')).resolves.not.toThrow();
+      await expect(
+        service.logout('uuid-1', 'nonexistent'),
+      ).resolves.not.toThrow();
     });
   });
 

@@ -1,9 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsArray, IsOptional, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsArray,
+  IsOptional,
+  IsDateString,
+} from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateApiKeyDto {
   @ApiProperty({ example: 'My App Key' })
   @IsString()
+  @IsNotEmpty()
+  @Transform(({ value }: { value: string }) => value.trim())
   name: string;
 
   @ApiPropertyOptional({ example: ['read', 'write'] })

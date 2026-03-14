@@ -36,9 +36,7 @@ describe('API Keys (e2e)', () => {
     prisma = app.get(PrismaService);
 
     // Register and login
-    await request(app.getHttpServer())
-      .post('/auth/register')
-      .send(testUser);
+    await request(app.getHttpServer()).post('/auth/register').send(testUser);
 
     const loginRes = await request(app.getHttpServer())
       .post('/auth/login')
@@ -121,6 +119,13 @@ describe('API Keys (e2e)', () => {
       return request(app.getHttpServer())
         .get('/auth/me')
         .set('X-API-Key', 'ask_invalidkey1234567890abcdef12')
+        .expect(401);
+    });
+
+    it('should reject API key auth on /api-keys (JWT-only)', () => {
+      return request(app.getHttpServer())
+        .get('/api-keys')
+        .set('X-API-Key', createdRawKey)
         .expect(401);
     });
   });

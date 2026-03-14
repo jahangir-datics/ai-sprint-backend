@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -14,18 +15,18 @@ export interface TransformedResponse<T> {
 }
 
 @Injectable()
-export class TransformInterceptor<T>
-  implements NestInterceptor<T, TransformedResponse<T>>
-{
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  TransformedResponse<T>
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<TransformedResponse<T>> {
-    const response = context.switchToHttp().getResponse();
+    const response = context.switchToHttp().getResponse<Response>();
     return next.handle().pipe(
-      map((data) => {
+      map((data: T) => {
         const statusCode = response.statusCode;
-        // If the controller already returned a shaped response, pass it through
         if (
           data &&
           typeof data === 'object' &&
@@ -33,7 +34,7 @@ export class TransformInterceptor<T>
           'message' in data &&
           'statusCode' in data
         ) {
-          return data as TransformedResponse<T>;
+          return data as unknown as TransformedResponse<T>;
         }
         return {
           data,

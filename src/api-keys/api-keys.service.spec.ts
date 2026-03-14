@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { ApiKeysService } from './api-keys.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -28,10 +28,7 @@ describe('ApiKeysService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ApiKeysService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [ApiKeysService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get<ApiKeysService>(ApiKeysService);
@@ -58,18 +55,26 @@ describe('ApiKeysService', () => {
     });
 
     it('should store the SHA-256 hash, not the raw key', async () => {
-      prisma.apiKey.create.mockImplementation(({ data }) => {
-        return Promise.resolve({
-          id: 'key-1',
-          name: data.name,
-          keyPrefix: data.keyPrefix,
-          keyHash: data.keyHash,
-        });
-      });
+      prisma.apiKey.create.mockImplementation(
+        ({
+          data,
+        }: {
+          data: { name: string; keyPrefix: string; keyHash: string };
+        }) => {
+          return Promise.resolve({
+            id: 'key-1',
+            name: data.name,
+            keyPrefix: data.keyPrefix,
+            keyHash: data.keyHash,
+          });
+        },
+      );
 
       const result = await service.create('user-1', { name: 'Test Key' });
 
-      const createCall = prisma.apiKey.create.mock.calls[0][0];
+      const createCall = prisma.apiKey.create.mock.calls[0][0] as {
+        data: { keyHash: string };
+      };
       const expectedHash = createHash('sha256')
         .update(result.key)
         .digest('hex');
@@ -88,7 +93,9 @@ describe('ApiKeysService', () => {
         expiresAt: '2026-12-31T23:59:59Z',
       });
 
-      const createCall = prisma.apiKey.create.mock.calls[0][0];
+      const createCall = prisma.apiKey.create.mock.calls[0][0] as {
+        data: { expiresAt: Date };
+      };
       expect(createCall.data.expiresAt).toEqual(
         new Date('2026-12-31T23:59:59Z'),
       );

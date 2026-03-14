@@ -24,7 +24,7 @@ import { LoginDto } from './dto/login.dto.js';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   @Public()
@@ -34,7 +34,11 @@ export class AuthController {
   @ApiResponse({ status: 409, description: 'Email already exists' })
   async register(@Body() dto: RegisterDto) {
     const user = await this.authService.register(dto);
-    return { data: user, message: 'User registered successfully', statusCode: 201 };
+    return {
+      data: user,
+      message: 'User registered successfully',
+      statusCode: 201,
+    };
   }
 
   @Post('login')
@@ -71,8 +75,11 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout and invalidate refresh token' })
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async logout(@Body() dto: RefreshTokenDto) {
-    await this.authService.logout(dto.refreshToken);
+  async logout(
+    @CurrentUser() user: { id: string },
+    @Body() dto: RefreshTokenDto,
+  ) {
+    await this.authService.logout(user.id, dto.refreshToken);
     return { data: null, message: 'Logged out successfully', statusCode: 200 };
   }
 
@@ -83,6 +90,10 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getProfile(@CurrentUser() user: { id: string }) {
     const profile = await this.authService.getProfile(user.id);
-    return { data: profile, message: 'User profile retrieved', statusCode: 200 };
+    return {
+      data: profile,
+      message: 'User profile retrieved',
+      statusCode: 200,
+    };
   }
 }

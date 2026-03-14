@@ -151,10 +151,17 @@ describe('Auth (e2e)', () => {
         });
     });
 
-    it('should reject invalid refresh token', () => {
+    it('should reject malformed refresh token', () => {
       return request(app.getHttpServer())
         .post('/auth/refresh')
         .send({ refreshToken: 'invalid-token' })
+        .expect(400);
+    });
+
+    it('should reject non-existent refresh token', () => {
+      return request(app.getHttpServer())
+        .post('/auth/refresh')
+        .send({ refreshToken: '00000000-0000-4000-8000-000000000000' })
         .expect(401);
     });
   });

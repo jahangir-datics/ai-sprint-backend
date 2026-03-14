@@ -5,7 +5,7 @@ import { IS_PUBLIC_KEY } from '../../common/decorators/public.decorator.js';
 
 @Injectable()
 export class CombinedAuthGuard extends AuthGuard(['jwt', 'api-key']) {
-  constructor(private reflector: Reflector) {
+  constructor(private readonly reflector: Reflector) {
     super();
   }
 
