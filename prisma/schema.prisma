@@ -69,45 +69,78 @@ model ApiKey {
 // =============================================
 
 model Webhook {
-  id        String   @id @default(uuid())
-  url       String
-  secret    String
-  events    String[]
-  isActive  Boolean  @default(true)
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(uuid())
+  userId           String
+  name             String
+  url              String
+  secret           String
+  isActive         Boolean  @default(true)
+  subscribedEvents String[]
+  description      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deliveries WebhookDelivery[]
+  user   User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events WebhookEvent[]
 
   @@index([userId])
+  @@index([isActive])
+}
+
+model WebhookEvent {
+  id            String             @id @default(uuid())
+  webhookId     String
+  eventType     String
+  payload       Json
+  status        WebhookEventStatus @default(PENDING)
+  nextAttemptAt DateTime?
+  deliveredAt   DateTime?
+  lastError     String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  webhook    Webhook           @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  deliveries WebhookDelivery[]
+
+  @@index([webhookId])
+  @@index([eventType])
+  @@index([status])
+  @@index([nextAttemptAt])
 }
 
 model WebhookDelivery {
-  id            String        @id @default(uuid())
-  webhookId     String
-  event         String
-  payload       Json
-  statusCode    Int?
-  responseBody  String?
-  attempt       Int           @default(1)
-  status        DeliveryStatus @default(PENDING)
-  nextRetryAt   DateTime?
-  deliveredAt   DateTime?
-  createdAt     DateTime      @default(now())
+  id             String                @id @default(uuid())
+  webhookEventId String
+  attemptNumber  Int
+  status         WebhookDeliveryStatus
+  responseCode   Int?
+  responseBody   String?
+  errorMessage   String?
+  durationMs     Int?
+  requestHeaders Json?
+  requestBody    Json?
+  attemptedAt    DateTime              @default(now())
 
-  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  webhookEvent WebhookEvent @relation(fields: [webhookEventId], references: [id], onDelete: Cascade)
 
-  @@index([webhookId])
+  @@unique([webhookEventId, attemptNumber])
+  @@index([webhookEventId])
   @@index([status])
+  @@index([attemptedAt])
 }
 
-enum DeliveryStatus {
+enum WebhookEventStatus {
   PENDING
+  PROCESSING
+  RETRYING
+  DELIVERED
+  FAILED
+}
+
+enum WebhookDeliveryStatus {
   SUCCESS
   FAILED
-  RETRYING
+  TIMEOUT
 }
 
 // =============================================
