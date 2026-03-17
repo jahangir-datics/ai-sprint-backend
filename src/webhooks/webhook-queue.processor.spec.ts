@@ -45,8 +45,9 @@ describe('WebhookQueueProcessor', () => {
     }).compile();
 
     processor = module.get<WebhookQueueProcessor>(WebhookQueueProcessor);
-    // Don't start the interval timer in tests
-    processor.onModuleDestroy();
+    // Clear the interval without setting stopped flag
+    clearInterval(processor['intervalId']);
+    processor['intervalId'] = null;
   });
 
   const mockEvent = {

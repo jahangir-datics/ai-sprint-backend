@@ -1,32 +1,10 @@
-import {
-  IsOptional,
-  IsInt,
-  Min,
-  Max,
-  IsBoolean,
-  IsIn,
-  IsString,
-} from 'class-validator';
-import { Transform, Type } from 'class-transformer';
+import { IsOptional, IsBoolean, IsIn, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { WEBHOOK_EVENT_TYPES } from '../webhook-event-types.js';
+import { PaginationQueryDto } from './pagination-query.dto.js';
 
-export class ListWebhooksQueryDto {
-  @ApiPropertyOptional({ default: 1 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  page?: number = 1;
-
-  @ApiPropertyOptional({ default: 20 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100)
-  limit?: number = 20;
-
+export class ListWebhooksQueryDto extends PaginationQueryDto {
   @ApiPropertyOptional()
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)

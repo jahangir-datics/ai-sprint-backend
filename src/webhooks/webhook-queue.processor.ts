@@ -15,6 +15,7 @@ const POLL_INTERVAL_MS = 5_000;
 export class WebhookQueueProcessor implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(WebhookQueueProcessor.name);
   private intervalId: ReturnType<typeof setInterval> | null = null;
+  private stopped = false;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -29,6 +30,7 @@ export class WebhookQueueProcessor implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy() {
+    this.stopped = true;
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
@@ -37,6 +39,8 @@ export class WebhookQueueProcessor implements OnModuleInit, OnModuleDestroy {
   }
 
   async processNext(): Promise<boolean> {
+    if (this.stopped) return false;
+
     const event = await this.prisma.webhookEvent.findFirst({
       where: {
         status: { in: ['PENDING', 'RETRYING'] },
