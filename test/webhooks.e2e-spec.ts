@@ -1,9 +1,8 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
+import { INestApplication } from '@nestjs/common';
 import { App } from 'supertest/types';
-import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { setupTestApp } from './helpers/setup';
 
 describe('Webhooks (e2e)', () => {
   let app: INestApplication<App>;
@@ -11,35 +10,15 @@ describe('Webhooks (e2e)', () => {
   let accessToken: string;
   let createdWebhookId: string;
 
-  const testUser = {
-    email: `e2e-webhooks-${Date.now()}@test.com`,
-    password: 'TestPass123!', // NOSONAR — test fixture
-    name: 'E2E Webhooks User',
-  };
-
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        transform: true,
-      }),
-    );
-    await app.init();
-
-    prisma = app.get(PrismaService);
-
-    // Register and login
-    await request(app.getHttpServer()).post('/auth/register').send(testUser);
-    const loginRes = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ email: testUser.email, password: testUser.password }); // NOSONAR
-    accessToken = loginRes.body.data.accessToken;
+    const ctx = await setupTestApp({
+      email: `e2e-webhooks-${Date.now()}@test.com`,
+      password: 'TestPass123!', // NOSONAR — test fixture
+      name: 'E2E Webhooks User',
+    });
+    app = ctx.app;
+    prisma = ctx.prisma;
+    accessToken = ctx.accessToken;
   });
 
   afterAll(async () => {
