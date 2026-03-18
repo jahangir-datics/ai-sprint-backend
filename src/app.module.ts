@@ -7,6 +7,9 @@ import { AuthModule } from './auth/auth.module.js';
 import { ApiKeysModule } from './api-keys/api-keys.module.js';
 import { WebhooksModule } from './webhooks/webhooks.module.js';
 import { FeatureFlagsModule } from './feature-flags/feature-flags.module.js';
+import { AuditModule } from './audit/audit.module.js';
+import { ActivityModule } from './activity/activity.module.js';
+import { AuditInterceptor } from './audit/audit.interceptor.js';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
@@ -20,10 +23,16 @@ import { AppService } from './app.service.js';
     ApiKeysModule,
     WebhooksModule,
     FeatureFlagsModule,
+    AuditModule,
+    ActivityModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AuditInterceptor,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
