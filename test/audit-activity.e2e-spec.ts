@@ -158,8 +158,9 @@ describe('Audit Trail + Activity Feed (e2e)', () => {
         .expect(200)
         .expect((res) => {
           // Admin shouldn't see user's activities (scoped by userId)
-          const hasUserActivity = res.body.data.items.some(
-            (i: { type: string }) => i.type === 'WEBHOOK_CREATED',
+          const items = res.body.data.items as { type: string }[];
+          const hasUserActivity = items.some(
+            (i) => i.type === 'WEBHOOK_CREATED',
           );
           expect(hasUserActivity).toBe(false);
         });
