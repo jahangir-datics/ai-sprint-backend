@@ -171,22 +171,30 @@ model FeatureFlag {
 // =============================================
 
 model AuditLog {
-  id         String   @id @default(uuid())
-  userId     String?
-  action     String
-  resource   String
-  resourceId String?
-  details    Json?
-  ipAddress  String?
-  userAgent  String?
-  statusCode Int
-  createdAt  DateTime @default(now())
+  id           String   @id @default(uuid())
+  userId       String?
+  action       String
+  resource     String
+  resourceId   String?
+  method       String?
+  path         String?
+  details      Json?
+  requestBody  Json?
+  responseBody Json?
+  ipAddress    String?
+  userAgent    String?
+  statusCode   Int
+  success      Boolean  @default(true)
+  createdAt    DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([resource])
+  @@index([action])
+  @@index([statusCode])
   @@index([createdAt])
+  @@index([resource, resourceId])
 }
 
 model Activity {
@@ -195,6 +203,8 @@ model Activity {
   type       String
   message    String
   metadata   Json?
+  resource   String?
+  resourceId String?
   createdAt  DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -202,4 +212,5 @@ model Activity {
   @@index([userId])
   @@index([type])
   @@index([createdAt])
+  @@index([userId, createdAt])
 }
