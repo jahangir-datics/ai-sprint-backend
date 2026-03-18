@@ -148,18 +148,22 @@ enum WebhookDeliveryStatus {
 // =============================================
 
 model FeatureFlag {
-  id            String   @id @default(uuid())
-  key           String   @unique
-  name          String
-  description   String?
-  isEnabled     Boolean  @default(false)
-  rolloutPercent Int     @default(0)
-  targetUsers   String[] @default([])
-  targetRoles   Role[]   @default([])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String   @id @default(uuid())
+  key            String   @unique
+  name           String
+  description    String?
+  isEnabled      Boolean  @default(false)
+  rolloutPercent Int      @default(0)
+  targetUsers    String[] @default([])
+  targetRoles    Role[]   @default([])
+  environment    String   @default("production")
+  createdBy      String?
+  updatedBy      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([key])
+  @@index([environment])
 }
 
 // =============================================

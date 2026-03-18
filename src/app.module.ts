@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { ApiKeysModule } from './api-keys/api-keys.module.js';
 import { WebhooksModule } from './webhooks/webhooks.module.js';
+import { FeatureFlagsModule } from './feature-flags/feature-flags.module.js';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
@@ -18,6 +19,7 @@ import { AppService } from './app.service.js';
     AuthModule,
     ApiKeysModule,
     WebhooksModule,
+    FeatureFlagsModule,
   ],
   controllers: [AppController],
   providers: [
